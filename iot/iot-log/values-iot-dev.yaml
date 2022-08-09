@@ -1,0 +1,386 @@
+##########################################################################################################
+#                   作者：何梦飞
+#                   编撰日期：2022年5月24日21点17分
+#                   服务：ubmp-auth
+#                   环境：prod
+#                   端口说明：
+#                       1. 注册端口：8071
+#                       2. 调度端口：20884
+#                   代码仓库地址：  http://gitlab.space.com/upms/ubmp/service/space-ubmp-auth.git                                                               #
+#                   nacos地址：
+#                       1. redis.yml,db-space.yml,nacos.yml,space.yml,common.yml,portal-env.yml
+#                   域名地址： null
+#xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+# 修改模块选择：
+#       1.deployment.yaml
+#       2.ingress.yaml
+#       3.service.yaml
+#
+############################################################ deployment.yaml ##########################################
+replicaCount: 1
+#》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》  镜像定义
+image:
+  repository: harbor.space.com/iot/iot-log
+  pullPolicy: IfNotPresent
+  tag: "ladev"
+#》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》 是否开启边车模式 skywalking?
+InitContainers:
+  Enabled: false
+  InitContainersMountsAttributes:
+    - name: sw-agent-sidecar
+      image: harbor.space.com/middleware/skywalking-agent:8.1.0
+      imagePullPolicy: IfNotPresent
+      command: ['sh']
+      args: ['-c','mkdir -p /skywalking/agent && cp -r /usr/skywalking/agent/* /skywalking/agent']
+      volumeMounts:
+        - mountPath: /skywalking/agent
+          name: sw-agent
+  ContainersMountsAttributes:
+    - mountPath: /usr/skywalking/agent
+      name: sw-agent
+  VolumesAttributes:
+    - name: sw-agent
+      emptyDir: {}
+# 》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》 - 是否开启镜像认证
+ImagePullSecrets:
+  Enabled: false
+  Attributes:
+    - name: dasdad
+#》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》---  是否开启资源限制
+resources:
+  Enabled: false
+  ResourcesAttributes:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+#》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》--- 是否开启健康检查
+HealthCheck:
+  Enabled: false
+  EetectAttributes:
+    startupProbe:
+      failureThreshold: 50
+      httpGet:
+        path: /actuator/health
+        port: registry
+        scheme: HTTP
+      initialDelaySeconds: 20
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 10
+    livenessProbe:
+      failureThreshold: 3
+      httpGet:
+        path: /actuator/health
+        port: registry
+        scheme: HTTP
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 1
+    readinessProbe:
+      failureThreshold: 3
+      httpGet:
+        path: /actuator/health
+        port: registry
+        scheme: HTTP
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 1
+#》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》--- 是否开启污点
+Tolerations:
+  Enabled: false
+  TolerationsAttributes:
+    - key: "middleware"
+      operator: "Equal"
+      value: "true"
+      effect: "NoSchedule"
+#》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》---  定义pord的端口
+Deployment:
+  Enabled: true
+  Ports:
+    - name: schedule
+      containerPort: 18220
+      protocol: TCP
+    - name: registry
+      containerPort: 8220
+      protocol: TCP
+######################################################## service.yaml #######################
+#》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》-- 是否开启 链路兼容
+Servicecompatible:
+  Enabled: false
+#》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》-- 是否开启 ClusterIP 网络IP
+ClusterIPService:
+  Enable: true
+  type: ClusterIP
+  ApplicationPort: 8220
+  ClusterExternalPorts:
+    - portName: schedule
+      port: 18220
+      targetPort: schedule
+      protocol: TCP
+    - portName: registry
+      protocol: TCP
+      port: 8220
+      targetPort: registry
+#》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》-- 是否开 NodePort 网络类型
+NodePortService:
+  Enable: false
+  type: NodePort
+  ClusterExternalPorts:
+    - portName: Security
+      protocol: TCP
+      port: 443
+      targetPort: Security
+    - portName: schedule
+      protocol: TCP
+      port: 23398
+      targetPort: schedule
+    - portName: registry
+      protocol: TCP
+      port: 3398
+      targetPort: registry
+      nodePort: 30001
+#》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》- LoadBalancer 网络类型
+LoadBalancerPortService:
+  Enable: false
+  type: LoadBalancer
+  ClusterExternalPorts:
+    - portName: encryption
+      port: 443  # 开启pod端口
+      protocol: TCP
+      targetPort: encryption # 开启pod映射到容器内部的端口
+    - portName: schedule
+      port: 23398  # 开启pod端口
+      targetPort: schedule # 开启pod映射到容器内部的端口
+      protocol: TCP
+    - portName: registry
+      port: 3398  # 开启pod端口
+      targetPort: registry # 开启pod映射到容器内部的端口
+      protocol: TCP
+      nodePort: 30001
+
+
+#############################################  ingress.yaml    #######################################################
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+  # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+
+
+########################################## 业务环境 变量 统一配置 #################
+#说明：修改变量如下：
+#  EnvironmentAnnotations
+#  EnvironmentGlobal
+#  EnvironmentSidecar
+#  EnvironmentCharacteristic
+#  EnvironmentPublic
+#  EnvironmentInterface
+#》》》》》》》》》》》》》》》》》》》注解：EnvironmentAnnotations ：唯一环境标识符号，代表着是哪个环境，属于那个业务线
+EnvironmentAnnotations:
+  ServiceBusinessLine: iot
+  ServiceEnvironment: dev
+  ServiceName: iot-alert
+#》》》》》》》》》》》》》》》》》》》》》》》》全局环境变量：EnvironmentGlobal{{$env}} #$env：部署环境
+EnvironmentGlobal:
+  - name: nacos-server-addr
+    value: nacos-cs.middleware.svc.dev.local:8848
+  - name: nacos-namespace
+    value:  iot-dev
+#》》》》》》》》》》》》》》》》》》》》》》》》》边车模式环境变量：EnvironmentSidecar
+EnvironmentSidecar: []
+#  - name: JAVA_OPTS
+#    value: "-javaagent:/usr/skywalking/agent/skywalking-agent.jar"
+#  - name: SW_AGENT_COLLECTOR_BACKEND_SERVICES
+#    value: "skywalking-oap.skywalking.svc.portal.local:11800"
+#  - name: SW_AGENT_NAME
+#    value: V3-PROD
+#  - name: SW_AGENT_AUTHENTICATION
+#    value: "tsw_site@example"
+#》》》》》》》》》》》》》》》》》》》》》》 特性接口环境变量：EnvironmentCharacteristic
+EnvironmentCharacteristic: []
+#》》》》》》》》》》》》》》》》》》》》》》》》》》》 中级间环境变量：EnvironmentPublic
+EnvironmentPublic:
+  - name: MysqlUrl
+    value: mysql-dev.space.com
+  - name: MysqlPort
+    value: "3306"
+  - name: MysqlUsername
+    value: iot
+  - name: MysqlPassword
+    value: TV7xofn9zfmqze
+  - name: RedisUrl
+    value: redis-haproxy.middleware.svc.dev.local
+  - name: RedisPort
+    value: "6379"
+  - name: RedisPassword
+    value: NOZE0swGdi
+  - name: rocketmqUrl
+    value: rocketmq-dev.space.com
+  - name: rocketmqPort
+    value: "9876"
+  - name: ElasticsearchUrl
+    value: elasticsearch-master.middleware.svc.dev.local
+  - name: ElasticsearchPort
+    value: "9200"
+  - name: ElasticsearchUsername
+    value: "elastic"
+  - name: ElasticsearchPassword
+    value: Wanzhu@sby!
+  - name: CassandraUrl
+    value: cassandra-iot-dev.space.com
+  - name: CassandraPort
+    value: "9042"
+  - name: CloudEdgeMqNameServer
+    value: dev-mq.space.com:9876
+  - name: CloudEdgeMqGroup
+    value: cloud-edge-proxy-prodcuer-group
+  - name: CloudEdgeMqTopic
+    value: edge_belong_system_door_control
+  - name: CloudEdgeSpaceUrl
+    value: http://iot-gateway-web-dev.space.com
+  - name: CloudEdgePropertyUrl
+    value: http://osms-gateway-dev.space.com
+  - name: CloudEdgeIotUrl
+    value: http://iot-gateway-web-dev.space.com
+  - name: CloudEdgeTenementCode
+    value: ZH_00098
+  - name: CloudEdgeProjectCode
+    value: ZH_00098_XM_00000001
+#业务接口环境变量：EnvironmentInterface
+nvironmentInterface:
+  # 门户内网前端地址
+  - name: portalUrl
+    value: portal-dev.space.com
+  # 门户内网网关地址
+  - name: portalAPIUrl
+    value: portal-gateway-dev.space.com
+  # 门户外网前端地址
+  - name: EportalUrl
+    value: portal-dev.spaceplat.com
+  # 门户外网网关地址
+  - name: EportalAPIUrl
+    value: portal-gateway-dev.spaceplat.com
+  # 物联网内网前端地址
+  - name: iotUrl
+    value: iot-dev.space.com
+  # 物联网内网网关地址
+  - name: iotAPIUrl
+    value: iot-gateway-web-dev.space.com
+  # 物联网外网前端地址
+  - name: EiotUrl
+    value: iot-dev.spaceplat.com
+  # 物联网外网网关地址
+  - name: EiotAPIUrl
+    value: iot-gateway-web-dev.spaceplat.com
+  # 运营内网前端地址
+  - name: osmsUrl
+    value: osms-dev.space.com
+  # 运营内网网关地址
+  - name: osmsAPIUrl
+    value: osms-gateway-dev.space.com
+  # 运营外网前端地址
+  - name: EosmsUrl
+    value: osms-dev.spaceplat.com
+  # 运营外网网关地址
+  - name: EosmsAPIUrl
+    value: osms-dev.spaceplat.com
+  # spaas内网前端地址
+  - name: spaasUrl
+    value: spaas-dev.space.com
+  # spaas内网网关地址
+  - name: spaasAPIUrl
+    value: spaas-gateway-dev.space.com
+  # spaas外网前端地址
+  - name: EspaasUrl
+    value: spaas-dev.spaceplat.com
+  # spaas外网网关地址
+  - name: EspaasAPIUrl
+    value: spaas-gateway-dev.spaceplat.com
+  # 大数据内网前端地址
+  - name: dataReportUrl
+    value: data-report-dev.space.com
+  # 大数据内网网关地址
+  - name: dataReportUrl
+    value: data-report-gateway-dev.space.com
+  # 大数据外网前端地址
+  - name: EdataReportUrl
+    value: data-report-dev.spaceplat.com
+  # 大数据外网网关地址
+  - name: EdataReportUrl
+    value: data-report-gateway-dev.spaceplat.com
+  # 招商内网前端地址
+  - name: investmentUrl
+    value: investment-dev.space.com
+  # 招商内网网关地址
+  - name: investmentAPIUrl
+    value: investment-gateway-dev.space.com
+  # 招商外网前端地址
+  - name: EinvestmentUrl
+    value: investment-dev.spaceplat.com
+  # 招商外网网关地址
+  - name: EinvestmentAPIUrl
+    value: investment-gateway-dev.spaceplat.com
+
+
+##》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》
+###########################################################》》》》》》》》》》》》》》》》》》》》》》》
+############################## 以下变量值 丢弃 ###########################################################################
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+nodeSelector: {}
+affinity: {}
+tolerations:
+  - effect: NoSchedule
+    key: iot
+    operator: Equal
+    value: "true"
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+nameOverride: ""
+fullnameOverride: ""
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+podAnnotations: {}
+podSecurityContext: {}
+# fsGroup: 2000
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+# runAsNonRoot: true
+# runAsUser: 1000
+#  {{- if .Values.Deployment.Enable}}
+#  {{- toYaml . | nindent 12 }}
+#  {{- end }}
+############################## 以上变量值 丢弃 ###########################################################################

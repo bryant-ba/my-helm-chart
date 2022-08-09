@@ -1,0 +1,56 @@
+####### 环境变量
+FrontAddress:
+  - name: bpmUrl
+    value: http://spaas-idev.space.com
+  - name: spaasUrl
+    value: http://spaas-idev.space.com
+BackendApiUrl:
+  - name: baseUrl
+    value: http://iam-backend.iam.svc.dev.local:8080
+  - name: portalUrl
+    value: http://portal-gateway-idev.space.com
+  - name: uploadUrl
+    value: http://file-service.dev.svc.public.local:9902
+
+
+Tolerations:
+  Enabled: false
+  TolerationsAttributes:
+    - key: "iam"
+      operator: "Equal"
+      value: "true"
+      effect: "NoSchedule"
+
+
+ingress:
+  enabled: false
+  className: ""
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+
+### 一般以下情况很少去修改，修改的场景为云上或者私有化场景
+ImagePullSecrets:
+  Enabled: false
+  Attributes:
+    - name: regcred
+service:
+  Enabled: false
+  type: NodePort
+  IngressPort: 80
+  PortScope:
+    - portName: registry
+      port: 80
+      targetPort: registry
+      protocol: TCP
+      nodePort: 31216
+

@@ -1,0 +1,53 @@
+replicaCount: 1
+
+image:
+  repository: harbor-state.space.com/ibp/contingency
+  pullPolicy: IfNotPresent
+  tag: ""
+
+####### 环境变量
+FrontAddress:
+  - name: iframeUrl
+    value: http://spaas-sit.space.com
+  - name: messageUrl
+    value: http://cbb-gateway-web.sit.svc.public.local:8000
+BackendApiUrl:
+  - name: estateUrl
+    value: http://pms-common-gateway-web.sit.svc.spaceiot.local:8000
+  - name: portalUrl
+    value: http://portal-gateway-sit.space.com
+  - name: baseUrl
+    value: http://iot-gateway-web-sit.space.com
+  - name: ibpUrl
+    value: http://ibp-gateway-web-sit.space.com
+  - name: messageWs
+    value: http://message-channel-sit.space.com
+  - name: uploadUrl
+    value: http://iot-gateway-web-sit.space.com
+  - name: vedioUrl
+    value: http://iot-gateway-web-sit.space.com
+  - name: spaceUrl
+    value: http://portal-gateway-sit.space.com/space/v1
+  - name: workOrderUrl
+    value: http://spaas-sit.space.com
+  - name: parkingUrl
+    value: http://ibp-gateway-web-sit.space.com
+  - name: spaasFlowUrl
+    value: http://spaas-sit.space.com/bpm-designer/
+
+
+
+
+
+
+ingress:
+  enabled: true
+  className: ""
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  hosts:
+    - host: spaceiot-sit.space.com
+      paths:
+        - path: /contingency
+          pathType: ImplementationSpecific
+  tls: []

@@ -1,0 +1,141 @@
+{{- if .Values.Nginx.Enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name:  {{  .Values.Nginx.NginxConfigName }}
+  labels:
+    {{- include "iot-view.labels" . | nindent 4 }}
+data:
+  nginx.conf: |+
+    user  root;
+    worker_processes  8;
+
+    events {
+        worker_connections  10240;
+    }
+
+
+    http {
+        include             mime.types;
+        default_type        application/octet-stream;
+        server_tokens       off;
+        sendfile            on;
+        keepalive_timeout   65;
+
+        gzip  on;
+        gzip_min_length     1k;
+        gzip_buffers        4 16k;
+        gzip_comp_level     1;
+        gzip_types          text/plain application/json text/css application/xml text/javascript application/x-httpd-php image/jpeg image/gif image/png;
+        gzip_vary off;
+        gzip_proxied any;
+
+        add_header Access-Control-Allow-Origin *;
+        add_header Access-Control-Allow-Headers X-Requested-With;
+        add_header Access-Control-Allow-Methods GET,POST,OPTIONS;
+
+        proxy_temp_path ./temp;
+        proxy_cache_path ./cache levels=1:2 keys_zone=cache_one:200m inactive=5m max_size=20g;
+
+        proxy_connect_timeout 5;
+        proxy_read_timeout 60;
+        proxy_send_timeout 5;
+        proxy_buffer_size 4k;
+        proxy_buffering on;
+        proxy_buffers 30 4k;
+
+        proxy_headers_hash_max_size 51200;
+        proxy_headers_hash_bucket_size 6400;
+
+        map $http_upgrade $connection_upgrade {
+            default upgrade;
+            '' close;
+        }
+
+        server {
+            listen       80;
+            server_name  localhost;
+
+            large_client_header_buffers 4 16k;
+            client_body_buffer_size 128k;
+            proxy_connect_timeout 600;
+            proxy_read_timeout 600;
+            proxy_send_timeout 600;
+            proxy_buffer_size 64k;
+            proxy_buffers   4 32k;
+            proxy_busy_buffers_size 64k;
+            proxy_temp_file_write_size 64k;
+
+            proxy_set_header    Host                        $host:$server_port;
+            proxy_set_header    X-Real-IP                   $remote_addr;
+            proxy_set_header    X-Forwarded-For             $proxy_add_x_forwarded_for;
+            proxy_set_header    HTTP_X_FORWARDED_FOR        $remote_addr;
+
+            client_max_body_size 10m; #上传文件大小限制
+            add_header X-Frame-Options SAMEORIGIN; #X-Frame-Options 低危漏洞
+
+            proxy_intercept_errors on;
+            recursive_error_pages on;
+            server_tokens       off; #错误页面隐藏版本号
+
+            location / {
+                expires 1s;
+                root   /opt/dist;
+    			try_files $uri $uri/ /index.html =404;
+                if ($request_filename ~* ^.*?.(js|html|css)$){
+                          add_header Cache-Control no-cache;
+                }
+                if ($request_filename ~* ^.*?.(txt|doc|pdf|rar|gz|zip|docx|exe|xlsx|ppt|pptx|jpg|png)$){
+                          add_header Cache-Control max-age=864000;#缓存一天
+                }
+                proxy_set_header  X-Real-IP  $remote_addr;
+                client_max_body_size  100m;
+                index  index.html index.htm;
+            }
+
+
+            location /player/ {
+                expires 1s;
+                root   /opt/;
+    			try_files $uri $uri/ /index.html =404;
+                if ($request_filename ~* ^.*?.(js|html|css)$){
+                          add_header Cache-Control no-cache;
+                }
+                if ($request_filename ~* ^.*?.(txt|doc|pdf|rar|gz|zip|docx|exe|xlsx|ppt|pptx|jpg|png)$){
+                          add_header Cache-Control max-age=864000;#缓存一天
+                }
+                proxy_set_header  X-Real-IP  $remote_addr;
+                client_max_body_size  100m;
+                index  index.html index.htm;
+            }
+            location /opreation-report/ {
+                expires 1s;
+                root   /opt/;
+    			try_files $uri $uri/ /index.html =404;
+                if ($request_filename ~* ^.*?.(js|html|css)$){
+                          add_header Cache-Control no-cache;
+                }
+                if ($request_filename ~* ^.*?.(txt|doc|pdf|rar|gz|zip|docx|exe|xlsx|ppt|pptx|jpg|png)$){
+                          add_header Cache-Control max-age=864000;#缓存一天
+                }
+                proxy_set_header  X-Real-IP  $remote_addr;
+                client_max_body_size  100m;
+                index  index.html index.htm;
+            }
+
+            location /libDecoder.wasm {
+    		    try_files $uri $uri/ /index.html =404;
+                root   /opt/videolib;
+                client_max_body_size  100m;
+                index  index.html index.htm;
+            }
+            location /parking-lot {
+                root   /opt/;
+    			try_files $uri $uri/ /index.html =404;
+                client_max_body_size  100m;
+                index  parkingLot.html index.html index.htm;
+            }
+
+        }
+    }
+{{- end }}

@@ -1,0 +1,37 @@
+replicaCount: 2
+
+image:
+  repository: space.tencentcloudcr.com/ibp/ibp-meter-reading
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+GlobalAttributes:
+  - name: nacos-server-addr
+    value: nacos-hs.middleware.svc.cluster.local:8848
+  - name: nacos-namespace
+    value: ibp-prod
+
+HostAliases:
+  Enable: true
+  HostAliasessAttributes:
+    - ip: "172.17.2.3"
+      hostnames:
+        - hadoop001
+    - ip: "172.17.2.4"
+      hostnames:
+        - hadoop002
+    - ip: "172.17.2.5"
+      hostnames:
+        - hadoop003
+    - ip: "172.17.2.6"
+      hostnames:
+        - hadoop004
+    - ip: "172.17.2.7"
+      hostnames:
+        - hadoop005
+
+FrontAddress: []
+BackendApiUrl: []
+ExternalFrontAddress: []
+ExternalBackendApiUrl: []

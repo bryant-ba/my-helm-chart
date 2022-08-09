@@ -1,0 +1,68 @@
+{{- if .Values.ClusterIPService.Enable }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "iot-gateway-app.fullname" . }}
+  labels:
+    {{- include "iot-gateway-app.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.ClusterIPService.type }}
+  ports: {{- $type := .Values.ClusterIPService.type -}}
+    {{- range .Values.ClusterIPService.ClusterExternalPorts }}
+    - port: {{ .port }}
+      targetPort: {{ .targetPort }}
+      protocol: {{ .protocol }}
+      name: {{ .portName }}
+      {{- if eq $type "NodePort" }}
+      nodePort: {{ .nodePort }}
+      {{- end }}
+     {{- end }}
+  selector:
+    {{- include "iot-gateway-app.selectorLabels" . | nindent 4 }}
+{{- end }}
+---
+{{- if .Values.NodePortService.Enable }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: headless-{{ include "iot-gateway-app.fullname" . }}
+  labels:
+    {{- include "iot-gateway-app.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.NodePortService.type }}
+  ports: {{- $type := .Values.NodePortService.type -}}
+    {{- range .Values.NodePortService.ClusterExternalPorts }}
+    - port: {{ .port }}
+      targetPort: {{ .targetPort }}
+      protocol: {{ .protocol }}
+      name: {{ .portName }}
+      {{- if eq $type "NodePort" }}
+      nodePort: {{ .nodePort }}
+      {{- end }}
+     {{- end }}
+  selector:
+    {{- include "iot-gateway-app.selectorLabels" . | nindent 4 }}
+{{- end }}
+---
+{{- if .Values.Servicecompatible.Enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth
+  labels:
+    {{- include "iot-gateway-app.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.ClusterIPService.type }}
+  ports: {{- $type := .Values.ClusterIPService.type -}}
+    {{- range .Values.ClusterIPService.ClusterExternalPorts }}
+    - port: {{ .port }}
+      targetPort: {{ .targetPort }}
+      protocol: {{ .protocol }}
+      name: {{ .portName }}
+      {{- if eq $type "NodePort" }}
+      nodePort: {{ .nodePort }}
+      {{- end }}
+     {{- end }}
+  selector:
+    {{- include "iot-gateway-app.selectorLabels" . | nindent 4 }}
+{{- end }}

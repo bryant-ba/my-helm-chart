@@ -1,0 +1,50 @@
+image:
+  repository: harbor.space.com/ibp/aircondition
+  pullPolicy: IfNotPresent
+  tag: ""
+
+
+####### 环境变量
+FrontAddress:
+  - name: iframeUrl
+    value: http://spaas-uat.spaceplat.com
+  - name: messageUrl
+    value: http://spaas-uat.spaceplat.com
+BackendApiUrl:
+  - name: portalUrl
+    value: http://portal-gateway-dev.space.com
+  - name: baseUrl
+    value: http://iot-gateway-web-dev.space.com
+  - name: ibpUrl
+    value: http://ibp-gateway-web-uat.spaceplat.com
+  - name: messageWs
+    value: http://message-channel-uat.spaceplat.com
+  - name: uploadUrl
+    value: http://iot-gateway-web-uat.spaceplat.com
+  - name: vedioUrl
+    value: http://iot-gateway-web-uat.spaceplat.com
+  - name: spaceUrl
+    value: http://portal-gateway-uat.spaceplat.com/space/v1
+  - name: workOrderUrl
+    value: http://spaas-uat.spaceplat.com
+  - name: parkingUrl
+    value: http://ibp-gateway-web-uat.spaceplat.com
+  - name: spaasFlowUrl
+    value: http://spaas-uat.spaceplat.com
+
+
+
+
+ingress:
+  enabled: true
+  className: ""
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  hosts:
+    - host: iot-dev.space.com
+      paths:
+        - path: /aircondition
+          pathType: ImplementationSpecific
+  tls: []
+
+

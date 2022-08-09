@@ -1,0 +1,223 @@
+replicaCount: 1
+image:
+  repository: space.tencentcloudcr.com/iot/iot-device
+  pullPolicy: IfNotPresent
+  tag: "latest"
+#》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》 是否开启边车模式 skywalking?
+InitContainers:
+  Enabled: false
+  InitContainersMountsAttributes:
+    - name: sw-agent-sidecar
+      image: harbor.space.com/middleware/skywalking-agent:8.1.0
+      imagePullPolicy: IfNotPresent
+      command: ['sh']
+      args: ['-c','mkdir -p /skywalking/agent && cp -r /usr/skywalking/agent/* /skywalking/agent']
+      volumeMounts:
+        - mountPath: /skywalking/agent
+          name: sw-agent
+  ContainersMountsAttributes:
+    - mountPath: /usr/skywalking/agent
+      name: sw-agent
+  VolumesAttributes:
+    - name: sw-agent
+      emptyDir: {}
+# 》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》 - 是否开启镜像认证
+ImagePullSecrets:
+  Enabled: false
+  Attributes:
+    - name: dasdad
+#》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》---  是否开启资源限制
+resources:
+  Enabled: false
+  ResourcesAttributes:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+#》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》--- 是否开启健康检查
+HealthCheck:
+  Enabled: true
+  EetectAttributes:
+    startupProbe:
+      failureThreshold: 50
+      httpGet:
+        path: /actuator/health
+        port: registry
+        scheme: HTTP
+      initialDelaySeconds: 20
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 10
+    livenessProbe:
+      failureThreshold: 3
+      httpGet:
+        path: /actuator/health
+        port: registry
+        scheme: HTTP
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 1
+    readinessProbe:
+      failureThreshold: 3
+      httpGet:
+        path: /actuator/health
+        port: registry
+        scheme: HTTP
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 1
+#》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》--- 是否开启污点
+Tolerations:
+  Enabled: false
+  TolerationsAttributes:
+    - key: "middleware"
+      operator: "Equal"
+      value: "true"
+      effect: "NoSchedule"
+#》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》---  定义pord的端口
+Deployment:
+  Enabled: true
+  Ports:
+    - name: schedule
+      containerPort: 18100
+      protocol: TCP
+    - name: registry
+      containerPort: 8100
+      protocol: TCP
+######################################################## service.yaml #######################
+#》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》-- 是否开启 链路兼容
+Servicecompatible:
+  Enabled: false
+#》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》-- 是否开启 ClusterIP 网络IP
+ClusterIPService:
+  Enable: true
+  type: ClusterIP
+  ApplicationPort: 8100
+  ClusterExternalPorts:
+    - portName: schedule
+      port: 18100
+      targetPort: schedule
+      protocol: TCP
+    - portName: registry
+      protocol: TCP
+      port: 8100
+      targetPort: registry
+#》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》-- 是否开 NodePort 网络类型
+NodePortService:
+  Enable: false
+  type: NodePort
+  ClusterExternalPorts:
+    - portName: Security
+      protocol: TCP
+      port: 443
+      targetPort: Security
+    - portName: schedule
+      protocol: TCP
+      port: 23398
+      targetPort: schedule
+    - portName: registry
+      protocol: TCP
+      port: 3398
+      targetPort: registry
+      nodePort: 30001
+#》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》- LoadBalancer 网络类型
+LoadBalancerPortService:
+  Enable: false
+  type: LoadBalancer
+  ClusterExternalPorts:
+    - portName: encryption
+      port: 443  # 开启pod端口
+      protocol: TCP
+      targetPort: encryption # 开启pod映射到容器内部的端口
+    - portName: schedule
+      port: 23398  # 开启pod端口
+      targetPort: schedule # 开启pod映射到容器内部的端口
+      protocol: TCP
+    - portName: registry
+      port: 3398  # 开启pod端口
+      targetPort: registry # 开启pod映射到容器内部的端口
+      protocol: TCP
+      nodePort: 30001
+
+
+#############################################  ingress.yaml    #######################################################
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+  # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+
+
+EnvironmentAnnotations:
+  ServiceBusinessLine: iot
+  ServiceEnvironment: prod
+  ServiceName: iot-device
+#》》》》》》》》》》》》》》》》》》》》》》》》全局环境变量：EnvironmentGlobal{{$env}} #$env：部署环境
+EnvironmentGlobal:
+  - name: nacos-server-addr
+    value: nacos-hs.middleware.svc.cluster.local:8848
+  - name: nacos-namespace
+    value:  iot-prod
+#》》》》》》》》》》》》》》》》》》》》》》》》》边车模式环境变量：EnvironmentSidecar
+EnvironmentSidecar: []
+EnvironmentCharacteristic: []
+#》》》》》》》》》》》》》》》》》》》》》》》》》》》 中级间环境变量：EnvironmentPublic
+EnvironmentPublic:
+  - name: RedisUrl
+    value: redis-haproxy.middleware.svc.cluster.local
+  - name: RedisPort
+    value: "6379"
+  - name: RedisPassword
+    value: none
+  - name: CloudEdgeMqNameServer
+    value: 106.52.161.104:9876
+  - name: CloudEdgeMqGroup
+    value: cloud-edge-proxy-prodcuer-group
+  - name: CloudEdgeMqTopic
+    value: edge_belong_system_door_control
+  - name: CloudEdgeSpaceUrl
+    value: http://gateway-web.uat.svc.spaceiot.local:8000
+  - name: CloudEdgePropertyUrl
+    value: https://osms-gateway-uat.spaceplat.com
+  - name: CloudEdgeIotUrl
+    value: https://iot-gateway-web.spaceplat.com
+  - name: CloudEdgeTenementCode
+    value: ZH_00004
+  - name: CloudEdgeProjectCode
+    value: ZH_00004_XM_00000001
+#业务接口环境变量：EnvironmentInterface
+EnvironmentInterface: []
+
+
+##》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》
+###########################################################》》》》》》》》》》》》》》》》》》》》》》》
+############################## 以下变量值 丢弃 ###########################################################################
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+nodeSelector: {}
+affinity: {}
+nameOverride: ""
+fullnameOverride: ""
+serviceAccount:
+  create: false
+  annotations: {}
+  name: ""
+podAnnotations: {}
+podSecurityContext: {}
+securityContext: {}

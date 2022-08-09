@@ -1,0 +1,57 @@
+GlobalAttributes:
+  - name: nacos-server-addr
+    value: nacos-cs.middleware-uat.svc.spaceiot-uat.local:8848
+  - name: nacos-namespace
+    value: op
+  - name: MysqlUrl
+    value: mysql-uat.space.com
+  - name: MysqlPort
+    value: "3309"
+  - name: MysqlUsername
+    value: root
+  - name: MysqlPassword
+    value: Wanzhu@sby!
+  - name: RedisUrl
+    value: redis-haproxy.middleware-uat.svc.public-uat.local
+  - name: RedisPort
+    value: "6379"
+  - name: RedisPassword
+    value: none
+  - name: ElasticsearchUrl
+    value: elasticsearch-master.middleware-uat.svc.public.local
+  - name: ElasticsearchPort
+    value: "9200"
+  - name: ElasticsearchPortz
+    value: "9300"
+  - name: ElasticsearchUsername
+    value: elastic
+  - name: ElasticsearchPassword
+    value: Wanzhu@sby!
+  - name: rocketmqUrl
+    value: uat-mq.space.com
+  - name: rocketmqPort
+    value: "9876"
+  - name: cassandraUrl
+    value: 172.16.163.52
+  - name: cassandraPort
+    value: "9042"
+  - name: CloudEdgeMqNameServer
+    value: uat-mq.space.com:9876
+  - name: CloudEdgeMqGroup
+    value: cloud-edge-proxy-prodcuer-group
+  - name: CloudEdgeMqTopic
+    value: edge_belong_system_door_control
+  - name: CloudEdgeSpaceUrl
+    value: http://iot-gateway-web-uat.spaceplat.com
+  - name: CloudEdgePropertyUrl
+    value: https://osms-gateway-uat.spaceplat.com
+  - name: CloudEdgeIotUrl
+    value: http://iot-gateway-web-uat.spaceplat.com
+  - name: CloudEdgeTenementCode
+    value: ZH_00004
+  - name: CloudEdgeProjectCode
+    value: ZH_00004_XM_00000001
+FrontAddress: []
+BackendApiUrl: []
+ExternalFrontAddress: []
+ExternalBackendApiUrl: []

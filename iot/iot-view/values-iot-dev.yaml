@@ -1,0 +1,62 @@
+ingress:
+  enabled: true
+  className: ""
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  hosts:
+    - host: iot-dev.space.com
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+        - path: /parking-lot
+          pathType: ImplementationSpecific
+        - path: /player
+          pathType: ImplementationSpecific
+        - path: /opreation-report
+          pathType: ImplementationSpecific
+  tls: []
+
+
+
+
+####### 环境变量
+FrontAddress:
+  - name: spaasFlowUrl
+    value: //spaas.space.com/bpm-designer/
+BackendApiUrl:
+  - name: portalUrl
+    value: portal-gateway-dev.space.com
+  - name: baseUrl
+    value: iot-gateway-web.space.com
+  - name: ibpUrl
+    value: ibp-gateway-web-dev.space.com
+  - name: iframeUrl
+    value: spaas-dev.space.com
+  - name: messageUrl
+    value: message-gateway-dev.space.com
+  - name: messageWs
+    value: message-channel-dev.space.com
+  - name: uploadUrl
+    value: iot-gateway-web-dev.space.com
+  - name: vedioUrl
+    value: iot-gateway-web-dev.space.com
+  - name: spaceUrl
+    value: portal-gateway-dev.space.com/space/v1
+  - name: workOrderUrl
+    value: spaas-dev.space.com
+  - name: parkingUrl
+    value: ibp-gateway-web-dev.space.com
+
+tolerations:
+  - effect: NoSchedule
+    key: iot
+    operator: Equal
+    value: "true"
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300

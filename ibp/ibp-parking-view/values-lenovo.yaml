@@ -1,0 +1,48 @@
+image:
+  repository: space.tencentcloudcr.com/ibp/parking
+  pullPolicy: IfNotPresent
+  tag: ""
+
+
+####### 环境变量
+FrontAddress:
+  - name: iframeUrl
+    value: https://spaas-gw-uat.lenovo.com
+  - name: messageUrl
+    value: https://message-gw-uat.lenovo.com
+BackendApiUrl:
+  - name: portalUrl
+    value: https://portal-gw-uat.lenovo.com
+  - name: baseUrl
+    value: https://iot-gwweb-uat.lenovo.com
+  - name: ibpUrl
+    value: https://ibp-gwweb-uat.lenovo.com
+  - name: messageWs
+    value: https://message-channel-uat.lenovo.com
+  - name: uploadUrl
+    value: https://iot-gwweb-uat.lenovo.com
+  - name: vedioUrl
+    value: https://iot-gwweb-uat.lenovo.com
+  - name: spaceUrl
+    value: https://portal-gw-uat.lenovo.com/space/v1
+  - name: workOrderUrl
+    value: https://spaas-gw-uat.lenovo.com
+  - name: parkingUrl
+    value: https://ibp-gwweb-uat.lenovo.com
+  - name: spaasFlowUrl
+    value: https://spaas-uat.lenovo.com/bpm-designer/
+
+
+
+
+ingress:
+  enabled: true
+  className: ""
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  hosts:
+    - host: iot-uat.lenovo.com
+      paths:
+        - path: /parking
+          pathType: ImplementationSpecific
+  tls: []

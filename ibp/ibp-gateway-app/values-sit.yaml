@@ -1,0 +1,119 @@
+GlobalAttributes:
+  - name: nacos_server_addr
+    value: nacos-cs.middleware-sit.svc.spaceiot.local:8848
+  - name: nacos_namespace
+    value: ibp
+  - name: MysqlUrl
+    value: mysql-iot.space.com
+  - name: MysqlPort
+    value: "3309"
+  - name: MysqlUsername
+    value: root
+  - name: MysqlPassword
+    value: Wanzhu@sby!
+  - name: RedisUrl
+    value: redis.middleware-sit.svc.spaceiot.local
+  - name: RedisPort                               
+    value: "6379" 
+  - name: RedisPassword                           
+    value: none   
+  - name: ElasticsearchUrl                        
+    value: elasticsearch-master.middleware-sit.svc.public.local
+  - name: ElasticsearchPort                       
+    value: "9200" 
+  - name: ElasticsearchPortz                      
+    value: "9300" 
+  - name: ElasticsearchUsername                   
+    value: elastic
+  - name: ElasticsearchPassword
+    value: Wanzhu@sby!
+  - name: rocketmqUrl
+    value: sit-mq.space.com
+  - name: rocketmqPort
+    value: "9876"
+  - name: cassandraUrl
+    value: 172.16.162.211                             
+  - name: cassandraPort                               
+    value: "9042"              
+  - name: CloudEdgeMqNameServer
+    value: sit-mq.space.com:9876
+  - name: CloudEdgeMqGroup
+    value: cloud-edge-proxy-prodcuer-group
+  - name: CloudEdgeMqTopic
+    value: edge_belong_system_door_control
+  - name: CloudEdgeSpaceUrl
+    value: http://gateway-web.sit.svc.spaceiot.local:8000
+  - name: CloudEdgePropertyUrl
+    value: http://osms-gateway-sit.space.com
+  - name: CloudEdgeIotUrl
+    value: http://gateway-web.sit.svc.spaceiot.local:8000
+  - name: CloudEdgeTenementCode
+    value: ZH_00098
+  - name: CloudEdgeProjectCode
+    value: ZH_00098_XM_00000001
+FrontAddress:
+  - name: portalUrl
+    value: http://portal-sit.space.com
+  - name: portalAPIUrl
+    value: http://portal-gateway-sit.space.com
+  - name: EportalUrl
+    value: https://portal-sit.spaceplat.com
+  - name: EportalAPIUrl
+    value: https://portal-sit.spaceplat.com
+  - name: iotUrl
+    value: http://spaceiot-sit.space.com
+  - name: iotAPIUrl
+    value: http://iot-gateway-web-sit.space.com
+  - name: EiotUrl
+    value: https://spaceiot-sit.spaceplat.com
+  - name: EiotAPIUrl
+    value: https://iot-gateway-web-sit.spaceplat.com
+  - name: osmsUrl
+    value: http://osms-sit.space.com
+  - name: osmsAPIUrl
+    value: http://osms-gateway-sit.space.com
+  - name: EosmsUrl
+    value: https://osms-sit.spaceplat.com
+  - name: EosmsAPIUrl
+    value: https://osms-sit.spaceplat.com
+  - name: spaasUrl
+    value: http://spaas-sit.space.com
+  - name: spaasAPIUrl
+    value: http://spaas-gateway-sit.space.com
+  - name: EspaasUrl
+    value: https://spaas-sit.spaceplat.com
+  - name: EspaasAPIUrl
+    value: https://spaas-sit.spaceplat.com
+  - name: EspaasAPIUrl
+    value: https://spaas-gateway-sit.spaceplat.com
+  - name: dataReportUrl
+    value: http://data-report-gateway-sit.space.com
+  - name: dataReportUrl
+    value: http://data-report-gateway-sit.space.com
+  - name: EdataReportUrl
+    value: https://data-report-gateway-sit.spaceplat.com
+  - name: EdataReportUrl
+    value: https://data-report-gateway-sit.spaceplat.com
+  - name: investmentUrl
+    value: http://investment-sit.space.com
+  - name: investmentAPIUrl
+    value: http://investment-gateway-sit.space.com
+  - name: EinvestmentUrl
+    value: https://investment-sit.spaceplat.com
+  - name: EinvestmentAPIUrl
+    value: https://investment-gateway-sit.spaceplat.com
+BackendApiUrl: []
+ExternalFrontAddress: []
+ExternalBackendApiUrl: []
+
+ingress:
+  enabled: true
+  className: ""
+  annotations: 
+    kubernetes.io/ingress.class: nginx
+  hosts:
+    - host: ibp-gateway-app-sit.space.com
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []

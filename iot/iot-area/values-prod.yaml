@@ -1,0 +1,158 @@
+replicaCount: 1
+image:
+  repository: space.tencentcloudcr.com/iot/iot-area
+  pullPolicy: IfNotPresent
+  tag: "latest"
+ImagePullSecrets:
+  Enabled: false
+  Attributes:
+    - name: dasdad
+resources:
+  Enabled: false
+  ResourcesAttributes:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+HealthCheck:
+  Enabled: true
+  EetectAttributes:
+    startupProbe:
+      failureThreshold: 50
+      httpGet:
+        path: /actuator/health
+        port: registry
+        scheme: HTTP
+      initialDelaySeconds: 20
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 10
+    livenessProbe:
+      failureThreshold: 3
+      httpGet:
+        path: /actuator/health
+        port: registry
+        scheme: HTTP
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 1
+    readinessProbe:
+      failureThreshold: 3
+      httpGet:
+        path: /actuator/health
+        port: registry
+        scheme: HTTP
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 1
+Tolerations:
+  Enabled: false
+  TolerationsAttributes:
+    - key: "middleware"
+      operator: "Equal"
+      value: "true"
+      effect: "NoSchedule"
+Deployment:
+  Enabled: true
+  Ports:
+    - name: schedule
+      containerPort: 18250
+      protocol: TCP
+    - name: registry
+      containerPort: 8250
+      protocol: TCP
+Servicecompatible:
+  Enabled: false
+ClusterIPService:
+  Enable: true
+  type: ClusterIP
+  ApplicationPort: 8250
+  ClusterExternalPorts:
+    - portName: schedule
+      port: 18250
+      targetPort: schedule
+      protocol: TCP
+    - portName: registry
+      protocol: TCP
+      port: 8250
+      targetPort: registry
+NodePortService:
+  Enable: false
+  type: NodePort
+  ClusterExternalPorts:
+    - portName: Security
+      protocol: TCP
+      port: 443
+      targetPort: Security
+    - portName: schedule
+      protocol: TCP
+      port: 23398
+      targetPort: schedule
+    - portName: registry
+      protocol: TCP
+      port: 3398
+      targetPort: registry
+      nodePort: 30001
+LoadBalancerPortService:
+  Enable: false
+  type: LoadBalancer
+  ClusterExternalPorts:
+    - portName: encryption
+      port: 443  # 开启pod端口
+      protocol: TCP
+      targetPort: encryption # 开启pod映射到容器内部的端口
+    - portName: schedule
+      port: 23398  # 开启pod端口
+      targetPort: schedule # 开启pod映射到容器内部的端口
+      protocol: TCP
+    - portName: registry
+      port: 3398  # 开启pod端口
+      targetPort: registry # 开启pod映射到容器内部的端口
+      protocol: TCP
+      nodePort: 30001
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+  # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+
+
+EnvironmentAnnotations:
+  ServiceBusinessLine: iot
+  ServiceEnvironment: prod
+  ServiceName: iot-area
+EnvironmentGlobal:
+  - name: nacos-server-addr
+    value: nacos-hs.middleware.svc.cluster.local:8848
+  - name: nacos-namespace
+    value:  iot-prod
+EnvironmentSidecar: []
+EnvironmentCharacteristic: []
+EnvironmentPublic: []
+EnvironmentInterface: []
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+nodeSelector: {}
+affinity: {}
+nameOverride: ""
+fullnameOverride: ""
+serviceAccount:
+  create: false
+  annotations: {}
+  name: ""
+podAnnotations: {}
+podSecurityContext: {}
+securityContext: {}

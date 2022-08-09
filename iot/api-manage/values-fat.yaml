@@ -1,0 +1,100 @@
+GlobalAttributes:
+  - name: nacos_server_addr
+    value: nacos.fat.svc.spaceiot.local:8848
+  - name: nacos_namespace
+    value: op
+  - name: MysqlUrl
+    value: 172.16.163.118
+  - name: MysqlPort
+    value: "3306"
+  - name: MysqlUsername
+    value: root
+  - name: MysqlPassword
+    value: Space@2021
+  - name: RedisUrl
+    value: 172.16.163.23
+  - name: RedisPort
+    value: "6379"
+  - name: rocketmqUrl
+    value: idev-mq.space.com
+  - name: rocketmqPort
+    value: "9876"
+  - name: cassandraUrl
+    value: 172.16.163.23
+  - name: cassandraPort
+    value: "9042"
+  - name: ElasticsearchUrl
+    value: elasticsearch-master.middleware-idev.svc.public.local
+  - name: ElasticsearchPort
+    value: "9200"
+  - name: ElasticsearchUsername
+    value: elastic
+  - name: ElasticsearchPassword
+    value: Wanzhu@sby!
+  - name: CloudEdgeMqNameServer
+    value: idev-mq.space.com:9876
+  - name: CloudEdgeMqGroup
+    value: cloud-edge-proxy-prodcuer-group
+  - name: CloudEdgeMqTopic
+    value: edge_belong_system_door_control
+  - name: CloudEdgeSpaceUrl
+    value: http://gateway-web.fat.svc.spaceiot.local:8000
+  - name: CloudEdgePropertyUrl
+    value: http://osms-gateway-fat.space.com
+  - name: CloudEdgeIotUrl
+    value: http://gateway-web.fat.svc.spaceiot.local:8000
+  - name: CloudEdgeTenementCode
+    value: ZH_00098
+  - name: CloudEdgeProjectCode
+    value: ZH_00098_XM_00000001
+ 
+FrontAddress:
+  - name: portalUrl
+    value: http://portal-idev.space.com
+  - name: EportalUrl
+    value: http://portal-idev.space.com
+  - name: EportalAPIUrl
+    value: http://portal-idev.space.com
+  - name: iotUrl
+    value: http://spaceiot-fat.space.com
+  - name: iotAPIUrl
+    value: https://iot-gateway-web-fat.space.com
+  - name: EiotUrl
+    value: https://spaceiot-fat.spaceplat.com
+  - name: EiotAPIUrl
+    value: https://iot-gateway-web-fat.spaceplat.com
+  - name: osmsUrl
+    value: http://osms-idev.space.com
+  - name: osmsAPIUrl
+    value: http://osms-gateway-idev.space.com
+  - name: EosmsUrl
+    value: https://osms-idev.spaceplat.com
+  - name: EosmsAPIUrl
+    value: https://osms-idev.spaceplat.com
+  - name: spaasUrl
+    value: http://spaas-idev.space.com
+  - name: spaasAPIUrl
+    value: http://spaas-gateway-idev.space.com
+  - name: EspaasUrl
+    value: https://spaas-idev.spaceplat.com
+  - name: EspaasAPIUrl
+    value: https://spaas-gateway-idev.spaceplat.com
+  - name: dataReportUrl
+    value: http://data-report-idev.space.com
+  - name: dataReportUrl
+    value: http://data-report-gateway-idev.space.com
+  - name: EdataReportUrl
+    value: https://data-report-idev.spaceplat.com
+  - name: EdataReportUrl
+    value: https://data-report-gateway-idev.spaceplat.com
+  - name: investmentUrl
+    value: http://investment-idev.space.com
+  - name: investmentAPIUrl
+    value: http://investment-gateway-idev.space.com
+  - name: EinvestmentUrl
+    value: https://investment-idev.spaceplat.com
+  - name: EinvestmentAPIUrl
+    value: https://investment-gateway-idev.spaceplat.com
+BackendApiUrl: []
+ExternalFrontAddress: []
+ExternalBackendApiUrl: []

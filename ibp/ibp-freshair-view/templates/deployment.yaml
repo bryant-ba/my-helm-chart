@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ibp-freshair-view.fullname" . }}
+  labels:
+    {{- include "ibp-freshair-view.labels" . | nindent 4 }}
+spec:
+  {{- if .Values.strategy.enabled }}
+  strategy:
+    type: {{ .Values.strategy.type }}
+    rollingUpdate:
+       {{- toYaml .Values.strategy.rollingUpdate | nindent 6 }}
+  {{- end }}
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "ibp-freshair-view.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "ibp-freshair-view.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- if .Values.ImagePullSecrets.Enabled }}
+      imagePullSecrets:
+        {{- toYaml .Values.ImagePullSecrets.Attributes | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "ibp-freshair-view.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          env:
+          {{- with .Values.FrontAddress }}
+            {{- toYaml . | nindent 13 }}
+          {{- end }}
+          {{- with .Values.BackendApiUrl }}
+            {{- toYaml . | nindent 13 }}
+          {{- end }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+          {{- range .Values.service.PortScope }}
+            - name: {{ .portName }}
+              containerPort: {{ .port }}
+              protocol: {{ .protocol }}
+          {{- end }}
+          {{- if .Values.HealthCheck.Enabled}}
+            {{- toYaml .Values.HealthCheck.EetectAttributes | nindent 10 }}
+          {{- end }}
+          {{- if .Values.resources.Enabled}}
+          resources:
+            {{- toYaml .Values.resources.ResourcesAttributes | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: time-config
+              mountPath: /etc/localtime
+              readOnly: true
+          {{- if .Values.Nginx.Enabled }}
+            {{- toYaml .Values.Nginx.ContainersMountsAttributes | nindent 12 }}
+          {{- end }}
+      volumes:
+        - name: time-config
+          hostPath:
+            path: /etc/localtime
+          {{- if .Values.Nginx.Enabled }}
+            {{- toYaml .Values.Nginx.VolumesAttributes | nindent 8 }}
+          {{- end }}
+      {{- if .Values.NodeSelector.Enabled }}
+      nodeSelector:
+        {{- toYaml .Values.NodeSelector.Attributes | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.Tolerations.Enabled }}
+      tolerations:
+        {{- toYaml .Values.Tolerations.TolerationsAttributes | nindent 8 }}
+      {{- end }}

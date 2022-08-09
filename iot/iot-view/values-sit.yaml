@@ -1,0 +1,57 @@
+
+
+ingress:
+  enabled: true
+  className: ""
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  hosts:
+    - host: spaceiot-sit.space.com
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+        - path: /parking-lot
+          pathType: ImplementationSpecific
+        - path: /player
+          pathType: ImplementationSpecific
+        - path: /opreation-report
+          pathType: ImplementationSpecific
+  tls: []
+
+
+####### 环境变量
+FrontAddress:
+  - name: spaasFlowUrl
+    value: http://spaas-sit.space.com
+BackendApiUrl:
+  - name: ibpUrl
+    value: http://ibp-gateway-web-sit.space.com
+  - name: iframeUrl
+    value: http://spaas-sit.space.com
+  - name: messageUrl
+    value: http://message-gateway-sit.space.com
+  - name: messageWs
+    value: http://message-channel-sit.space.com
+  - name: uploadUrl
+    value: http://iot-gateway-web-sit.space.com
+  - name: vedioUrl
+    value: http://iot-gateway-web-sit.space.com
+  - name: spaceUrl
+    value: http://portal-gateway-sit.space.com/space/v1
+  - name: workOrderUrl
+    value: http://spaas-sit.space.com
+  - name: parkingUrl
+    value: http://ibp-gateway-web-sit.space.com
+  - name: portalUrl
+    value: http://portal-gateway-sit.space.com
+  - name: baseUrl
+    value: http://iot-gateway-web-sit.space.com
+
+
+
+
+
+
+
+
+

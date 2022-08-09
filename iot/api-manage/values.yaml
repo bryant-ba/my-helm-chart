@@ -1,0 +1,178 @@
+# Default values for api-manage.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: harbor.space.com/iot/api-manage
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+### 配置服务端口
+service:
+  Enabled: false
+  type: NodePort
+  IngressPort: 8080
+  PortScope:
+    - portName: registry
+      port: 8080
+      targetPort: registry
+      protocol: TCP
+      nodePort: 32016
+
+## 证书
+ImagePullSecrets:
+  Enabled: false
+  Attributes:
+    - name: regcred
+
+
+#################################################### 环境变量区域
+JavaAttributes:
+  - name: JAVA_HOME
+    value: "java  -Xms512m -Xmx512m -Dfile.encoding=UTF-8 -Duser.timezone=GMT+08 -jar api-manage-1.0.0.jar"
+GlobalAttributes:
+  - name: nacos_server_addr
+    value: nacos-cs.middleware.svc.dev.local:8848
+  - name: nacos_namespace
+    value: ibp-dev
+  - name: MysqlUrl
+    value: mysql-dev.space.com
+  - name: MysqlPort
+    value: "3306"
+  - name: MysqlUsername
+    value: iot
+  - name: MysqlPassword
+    value: "17Bk8LafF5RvuHseTqP9"
+FrontAddress:
+  - name: portalUrl
+    value: portal-dev.space.com
+BackendApiUrl:
+  - name: portalAPIUrl
+    value: portal-gateway-dev.space.com
+ExternalFrontAddress:
+  - name: EiotUrl
+    value: iot-dev.spaceplat.com
+ExternalBackendApiUrl:
+  - name: EiotAPIUrl
+    value: iot-gateway-dev.spaceplat.com
+######################################################################
+
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+
+resources:
+  Enabled: false
+  ResourcesAttributes:
+    limits:
+      cpu: 2000m
+      memory: 1.3Gi
+    requests:
+      cpu: 500m
+      memory: 1.3Gi
+
+HealthCheck:
+  Enabled: false
+  EetectAttributes:
+    startupProbe:
+      failureThreshold: 10
+      httpGet:
+        path: /portal/actuator/spaceHealth
+        port: registry
+      initialDelaySeconds: 60
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 30
+    livenessProbe:
+      failureThreshold: 3
+      httpGet:
+        path: /portal/actuator/spaceHealth
+        port: registry
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 30
+    readinessProbe:
+      failureThreshold: 3
+      httpGet:
+        path: /portal/actuator/spaceHealth
+        port: registry
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 30
+
+
+
+Tolerations:
+  Enabled: false
+  TolerationsAttributes:
+    - key: "iam"
+      operator: "Equal"
+      value: "true"
+      effect: "NoSchedule"
+
+
+
+
+NodeSelector:
+  Enabled: false
+  Attributes:
+    kubernetes.io/hostname: kdev-control-163.230
+############################################################### 以下内容很少改动
+###定义滚动更新策略
+strategy:
+  enabled: true
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: 1
+    maxUnavailable: 0
+
+
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+affinity: {}
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+# fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+# runAsUser: 1000

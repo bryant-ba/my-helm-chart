@@ -1,0 +1,41 @@
+{{- if .Values.Nginx.Enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name:  {{  .Values.Nginx.NginxConfigName }}
+  labels:
+    {{- include "ibp-aircondition-view.labels" . | nindent 4 }}
+data:
+  nginx.conf: |+
+    events {
+        worker_connections 1024;
+    }
+
+    http {
+        include /etc/nginx/mime.types;
+
+        underscores_in_headers on;
+
+        server {
+            listen 80 default_server;
+            gzip on;
+            gzip_min_length 1000;
+            gzip_types text/plain application/x-javascript application/javascript text/css application/xml application/json;
+            charset utf-8;
+            charset_types text/plain application/javascript application/x-javascript application/json text/css;
+            location / {
+                  root  /opt;
+                  try_files $uri $uri/ /index.html =404;
+                  client_max_body_size     100m;
+            }
+            location /index.html {
+                  add_header Cache-Control no-cache;
+                  add_header Cache-Control private;
+                  root  /opt;
+                  try_files $uri $uri/ /index.html =404;
+                  client_max_body_size     100m;
+            }
+
+        }
+    }
+{{- end }}

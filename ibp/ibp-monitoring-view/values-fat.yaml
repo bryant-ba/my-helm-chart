@@ -1,0 +1,50 @@
+image:
+  repository: harbor.space.com/ibp/monitoring
+  pullPolicy: IfNotPresent
+  tag: ""
+
+
+####### 环境变量
+FrontAddress:
+  - name: iframeUrl
+    value: http://workorderview.idev.svc.public.local
+  - name: messageUrl
+    value: http://message-gateway.idev.svc.public.local:8550
+BackendApiUrl:
+  - name: portalUrl
+    value: http://portal-gateway-idev.space.com
+  - name: baseUrl
+    value: http://gateway-web.fat.svc.spaceiot.local:8000
+  - name: ibpUrl
+    value: http://ibp-gateway-web.fat.svc.spaceiot.local:8000
+  - name: messageWs
+    value: http://message-channel-idev.space.com
+  - name: uploadUrl
+    value: http://gateway-web.fat.svc.spaceiot.local:8000
+  - name: vedioUrl
+    value: http://gateway-web.fat.svc.spaceiot.local:8000
+  - name: spaceUrl
+    value: http://portal-gateway-idev.space.com/space/v1
+  - name: workOrderUrl
+    value: http://workorderview.idev.svc.public.local
+  - name: parkingUrl
+    value: http://ibp-gateway-web.fat.svc.spaceiot.local:8000
+  - name: spaasFlowUrl
+    value: http://spaas-idev.space.com
+
+
+
+
+ingress:
+  enabled: true
+  className: ""
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  hosts:
+    - host: spaceiot-fat.space.com
+      paths:
+        - path: /monitoring
+          pathType: ImplementationSpecific
+  tls: []
+
+

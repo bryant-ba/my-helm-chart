@@ -1,0 +1,52 @@
+replicaCount: 2
+
+image:
+  repository: space.tencentcloudcr.com/ibp/parking
+  pullPolicy: IfNotPresent
+  tag: ""
+
+
+####### 环境变量
+FrontAddress:
+  - name: iframeUrl
+    value: https://spaas.spaceplat.com
+  - name: messageUrl
+    value: https://message-gateway-prod.spaceplat.com
+BackendApiUrl:
+  - name: portalUrl
+    value: https://portal-gateway.spaceplat.com
+  - name: baseUrl
+    value: https://iot-gateway-web.spaceplat.com
+  - name: ibpUrl
+    value: https://ibp-gateway-web.spaceplat.com
+  - name: messageWs
+    value: https://message-channel-prod.spaceplat.com
+  - name: uploadUrl
+    value: https://iot-gateway-web.spaceplat.com
+  - name: vedioUrl
+    value: https://iot-gateway-web.spaceplat.com
+  - name: spaceUrl
+    value: https://portal-gateway.spaceplat.com/space/v1
+  - name: workOrderUrl
+    value: https://spaas.spaceplat.com
+  - name: parkingUrl
+    value: https://ibp-gateway-web.spaceplat.com
+  - name: spaasFlowUrl
+    value: //spaas.spaceplat.com/bpm-designer/
+
+
+
+
+ingress:
+  enabled: true
+  className: ""
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  hosts:
+    - host: iot.spaceplat.com
+      paths:
+        - path: /parking
+          pathType: ImplementationSpecific
+  tls: []
+
+

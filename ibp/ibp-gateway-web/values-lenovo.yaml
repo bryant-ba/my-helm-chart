@@ -1,0 +1,29 @@
+replicaCount: 1
+
+image:
+  repository: space.tencentcloudcr.com/ibp/ibp-gateway-web
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+GlobalAttributes:
+  - name: nacos-server-addr
+    value: 10.122.144.36:31769
+  - name: nacos-namespace
+    value: ibp
+FrontAddress: []
+BackendApiUrl: []
+ExternalFrontAddress: []
+ExternalBackendApiUrl: []
+
+ingress:
+  enabled: true
+  className: ""
+  annotations: 
+    kubernetes.io/ingress.class: nginx
+  hosts:
+    - host: ibp-gwweb-uat.lenovo.com
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []

@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "iot-gateway-app.fullname" . }}
+  labels:
+    {{- include "iot-gateway-app.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "iot-gateway-app.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.EnvironmentAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "iot-gateway-app.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- if .Values.InitContainers.Enabled}}
+      initContainers:
+        {{- toYaml .Values.InitContainers.InitContainersMountsAttributes | nindent 8  }}
+      {{- end }}
+      {{- if .Values.ImagePullSecrets.Enabled }}
+      imagePullSecrets:
+        {{- toYaml .Values.ImagePullSecrets.Attributes | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "iot-gateway-app.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          env:
+          {{- with .Values.EnvironmentGlobal }}
+            {{- toYaml . | nindent 13 }}
+          {{- end }}
+          {{- with .Values.EnvironmentSidecar }}
+            {{- toYaml . | nindent 13 }}
+          {{- end }}
+          {{- with .Values.EnvironmentCharacteristic }}
+            {{- toYaml . | nindent 13 }}
+          {{- end }}
+          {{- with .Values.EnvironmentPublic }}
+            {{- toYaml . | nindent 13 }}
+          {{- end }}
+          {{- with .Values.EnvironmentInterface }}
+            {{- toYaml . | nindent 13 }}
+          {{- end }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+          {{- if .Values.Deployment.Enabled}}
+            {{- toYaml .Values.Deployment.Ports | nindent 12 }}
+          {{- end }}
+          {{- if .Values.HealthCheck.Enabled}}
+            {{- toYaml .Values.HealthCheck.EetectAttributes | nindent 10 }}
+          {{- end }}
+          {{- if .Values.resources.Enabled}}
+          resources:
+            {{- toYaml .Values.resources.ResourcesAttributes | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: time-config
+              mountPath: /etc/localtime
+              readOnly: true
+          {{- if .Values.InitContainers.Enabled }}
+            {{- toYaml .Values.InitContainers.ContainersMountsAttributes | nindent 12 }}
+          {{- end }}
+      volumes:
+        - name: time-config
+          hostPath:
+            path: /etc/localtime
+          {{- if .Values.InitContainers.Enabled }}
+            {{- toYaml .Values.InitContainers.VolumesAttributes | nindent 8 }}
+          {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.Tolerations.Enabled }}
+      tolerations:
+        {{- toYaml .Values.Tolerations.TolerationsAttributes | nindent 8 }}
+      {{- end }}
